@@ -1,0 +1,30 @@
+- name: creating user
+  hosts: all
+  become: yes
+
+  vars:
+    favcolor: blue
+
+tasks:
+   - user:
+      name: "{{ item }}"
+      state: present
+     loop:
+      - "{{ user }}"
+
+   - ansible.builtin.user:
+      name: "{{ user }}"
+      shell: /bin/bash
+      #append: yes
+
+   - name: set password expiration
+     ansible.builtin.user:
+       name: "{{ user }}"
+       password: "{{ password }}"
+
+   - name: Add {{ user }} to sudoers file
+     ansible.builtin.lineinfile:
+       path: /etc/sudoers
+       regexp: '^{{ user }}'
+       line: '{{ user }} ALL=(ALL) NOPASSWD: ALL'
+       validate: 'visudo -cf %s'
